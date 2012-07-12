@@ -1295,8 +1295,8 @@ function _content_field_invoke($op, &$node, $teaser = NULL, $page = NULL) {
 
     // Make sure AHAH 'add more' button isn't sent to the fields for processing.
     unset($items[$field['field_name'] .'_add_more']);
-
-    $module = $field_types[$field['type']]['module'];
+    if (isset($field_types[$field['type']]['module']))
+      $module = $field_types[$field['type']]['module'];
     $function = $module .'_field';
     if (function_exists($function)) {
       $result = $function($op, $node, $field, $items, $teaser, $page);
@@ -1424,7 +1424,8 @@ function _content_widget_types() {
  */
 function _content_get_formatter($formatter_name, $field_type) {
   $field_types = _content_field_types();
-  $formatters = $field_types[$field_type]['formatters'];
+  if (isset($field_types[$field_type]['formatters']))
+    $formatters = $field_types[$field_type]['formatters'];
 
   if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
     // This might happen when the selected formatter has been renamed in the
