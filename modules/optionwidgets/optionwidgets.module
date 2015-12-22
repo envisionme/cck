@@ -239,13 +239,15 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
 
   $element[$field_key] = array(
     '#type' => 'select',
-    '#title' => $element['#title'],
     '#description' => $element['#description'],
     '#required' => isset($element['#required']) ? $element['#required'] : $field['required'],
     '#multiple' => isset($element['#multiple']) ? $element['#multiple'] : $field['multiple'],
     '#options' => $options,
     '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
   );
+  if (isset($element['#title'])) {
+    $element[$field_key]['#title'] = $element['#title'];
+  }
 
   // Set #element_validate in a way that it will not wipe out other
   // validation functions already set by other modules.
