@@ -320,7 +320,7 @@ function _content_multigroup_node_form_after_build($form, &$form_state) {
   }
 
 
-  if ($form_state['submitted'] && !$form_state['multigroup_add_more']) {
+  if ($form_state['submitted'] && (empty($form_state['multigroup_add_more']) || !$form_state['multigroup_add_more'])) {
     // Fix value positions in $form_state for the fields in multigroups.
     foreach (array_keys($form['#multigroups']) as $group_name) {
       content_multigroup_node_form_transpose_elements($form, $form_state, $form['#node']->type, $group_name);
@@ -588,7 +588,9 @@ function content_multigroup_node_form_fix_deltas(&$elements, $form_deltas) {
     if (isset($elements[$key]) && $elements[$key] && substr($key, -9) != '_add_more') {
 
       // Fix the second item, the delta value, of the element's '#parents' array.
-      $elements[$key]['#parents'][1] = $form_deltas[$elements[$key]['#parents'][1]];
+      if (isset($elements[$key]['#parents'])) {
+        $elements[$key]['#parents'][1] = $form_deltas[$elements[$key]['#parents'][1]];
+      }
 
       // If present, fix delta value in '#delta' attribute of the element.
       if (isset($elements[$key]['#delta']) && isset($form_deltas[$elements[$key]['#delta']])) {
@@ -615,7 +617,7 @@ function content_multigroup_node_form_fix_parents(&$elements, $multigroups) {
       // Check if the current element is child of a multigroup. The #parents
       // array for field values has, at least, 3 parent elements, being the
       // first one the name of a multigroup.
-      if (count($elements[$key]['#parents']) >= 3 && isset($multigroups[$elements[$key]['#parents'][0]])) {
+      if (isset($elements[$key]['#parents']) && count($elements[$key]['#parents']) >= 3 && isset($multigroups[$elements[$key]['#parents'][0]])) {
 
         // Extract group name, delta and field name from the #parents array.
         array_shift($elements[$key]['#parents']);
@@ -659,8 +661,8 @@ function content_multigroup_node_form_fix_post(&$elements) {
  * @see content_multigroup_node_form_transpose_elements()
  */
 function content_multigroup_fix_element_values($element, &$form_state) {
-  $field_name = $element['#field_name'];
-  $delta = $element['#delta'];
+  $field_name = isset($element['#field_name']) ? $element['#field_name'] : '';
+  $delta = isset($element['#delta']) ? $element['#delta'] : 0;
   if (!isset($form_state['values'][$field_name][$delta]['_weight']) || !isset($form_state['values'][$field_name][$delta]['_remove'])) {
     $value = array('_weight' => $element['#_weight'], '_remove' => $element['#removed']);
     if (isset($form_state['values'][$field_name][$delta]) && is_array($form_state['values'][$field_name][$delta])) {
@@ -674,13 +676,20 @@ function content_multigroup_fix_element_values($element, &$form_state) {
  * Fix the value for fields that deal with multiple values themselves.
  */
 function content_multigroup_fix_multivalue_fields($element, &$form_state) {
-  $field_name = $element['#field_name'];
-  $delta = $element['#delta'];
+  $field_name = isset($element['#field_name']) ? $element['#field_name'] : '';
+  $delta = isset($element['#delta']) ? $element['#delta'] : 0;
   if (isset($form_state['values'][$field_name][$delta][0]) && is_array($form_state['values'][$field_name][$delta][0])) {
-    $value = array_merge($form_state['values'][$field_name][$delta][0], array('_remove' => $element['#removed']));
+    $remove = array();
+    if (isset($element['#removed'])) {
+      $remove['_remove'] = $element['#removed'];
+    }
+    $value = array_merge($form_state['values'][$field_name][$delta][0], $remove);
   }
   else {
-    $value = array('_remove' => $element['#removed']);
+    $value = array();
+    if (isset($element['#removed'])) {
+      $value['_remove'] = $element['#removed'];
+    }
   }
   form_set_value($element, $value, $form_state);
 }
