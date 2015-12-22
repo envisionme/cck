@@ -2854,7 +2854,8 @@ function &content_get_nested_elements(&$form, $field_name) {
     }
   }
 
-  return $single ? $results[$field_name] : $results;
+  $return = $single ? $results[$field_name] : $results;
+  return $return;
 }
 
 /**
