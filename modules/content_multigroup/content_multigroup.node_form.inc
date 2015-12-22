@@ -590,6 +590,8 @@ function content_multigroup_node_form_fix_deltas(&$elements, $form_deltas) {
       // Fix the second item, the delta value, of the element's '#parents' array.
       if (isset($elements[$key]['#parents'])) {
         $elements[$key]['#parents'][1] = $form_deltas[$elements[$key]['#parents'][1]];
+      } else {
+        $elements[$key]['#parents'] = array();
       }
 
       // If present, fix delta value in '#delta' attribute of the element.
